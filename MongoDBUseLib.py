@@ -23,6 +23,11 @@ class UseMongoDB():
     def writeInDB(self, data):
         result = posts.insert_one(data)
 
+    # Add a key/value pair in a exsisting document of DB. Based on a primary key (specific value which just this entry has)
+    def updatebyPrimKey(self, primKey, primValue, key, value):
+        collection = self.db['{}'.format(self.dbCollectionName)]
+        return collection.update_one({"{}".format(primKey): primValue}, {"$set": {"{}".format(key): "{}".format(value)}})
+
 ###################################################################################
 #Get DATA
 
@@ -32,8 +37,30 @@ class UseMongoDB():
             dbResult = self.db['{}'.format(self.dbCollectionName)].find()
             dbResultList = []
             for emps in dbResult:
-                #print emps
                 dbResultList.append(emps)
         except Exception, e:
             print str(e)
         return dbResultList
+
+    #Get all data in DB which has a specific key value
+    def getAllDataOfACertainKeyValue(self, key, value):
+        return self.db['{}'.format(self.dbCollectionName)].find_one({"{}".format(key): "{}".format(value)})
+
+    # Get all values in data base of a certain key
+    def getAllEntriesOfCertainKey(self, key):
+        allData = self.getAllData()
+        allDataFilteredbyKey = []
+        for i in range(len(allData)):
+            allDataFilteredbyKey.append(self.extactOneField(allData[i], key))
+        return allDataFilteredbyKey
+
+###################################################################################
+#Check methods
+
+    #Check if certain key Value pair exist
+    def checkIfKeyValueExist(self, key ,value):
+        existence = self.db['{}'.format(self.dbCollectionName)].find_one({"{}".format(key):"{}".format(value)})
+        if (existence != None):
+            return True
+        else:
+            return False
